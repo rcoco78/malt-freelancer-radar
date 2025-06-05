@@ -1,14 +1,15 @@
-
 import React, { useState, useMemo } from 'react';
-import { Search, Filter, TrendingUp, Users, Star, Calendar } from 'lucide-react';
+import { Search, Filter, TrendingUp, Users, Star, Calendar, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FreelancerCard } from '@/components/FreelancerCard';
 import { FreelancerModal } from '@/components/FreelancerModal';
 import { StatsCards } from '@/components/StatsCards';
 import { FilterPanel } from '@/components/FilterPanel';
+import { Dashboard } from '@/components/Dashboard';
 
 // Mock data basé sur votre structure
 const mockFreelancers = [
@@ -76,6 +77,7 @@ const Index = () => {
   const [selectedFreelancer, setSelectedFreelancer] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState('ranking');
+  const [activeTab, setActiveTab] = useState('freelancers');
   const [filters, setFilters] = useState({
     minRating: 0,
     skills: [],
@@ -114,7 +116,7 @@ const Index = () => {
                 <TrendingUp className="w-5 h-5 text-white" />
               </div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-                FreelanceTracker
+                FreelanceTracker Pro
               </h1>
             </div>
             <div className="flex items-center space-x-4">
@@ -130,70 +132,90 @@ const Index = () => {
         {/* Stats Cards */}
         <StatsCards freelancers={mockFreelancers} />
 
-        {/* Search and Filters */}
-        <div className="mb-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="flex-1 max-w-md">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <Input
-                  placeholder="Rechercher par nom ou compétence..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
-                />
+        {/* Main Navigation */}
+        <Tabs defaultValue="freelancers" className="w-full" onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-2 mb-8">
+            <TabsTrigger value="freelancers" className="flex items-center space-x-2">
+              <Users className="w-4 h-4" />
+              <span>Freelancers</span>
+            </TabsTrigger>
+            <TabsTrigger value="dashboard" className="flex items-center space-x-2">
+              <BarChart3 className="w-4 h-4" />
+              <span>Analytics</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="freelancers">
+            {/* Search and Filters */}
+            <div className="mb-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div className="flex-1 max-w-md">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      placeholder="Rechercher par nom ou compétence..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-3">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  >
+                    <option value="ranking">Classement</option>
+                    <option value="rating">Note</option>
+                    <option value="reviews">Nombre d'avis</option>
+                  </select>
+                  
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="border-gray-300 hover:border-orange-500 hover:text-orange-600"
+                  >
+                    <Filter className="w-4 h-4 mr-2" />
+                    Filtres
+                  </Button>
+                </div>
               </div>
+
+              {showFilters && (
+                <FilterPanel 
+                  filters={filters} 
+                  onFiltersChange={setFilters}
+                  className="mt-6 pt-6 border-t border-gray-200" 
+                />
+              )}
             </div>
-            
-            <div className="flex items-center space-x-3">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-              >
-                <option value="ranking">Classement</option>
-                <option value="rating">Note</option>
-                <option value="reviews">Nombre d'avis</option>
-              </select>
-              
-              <Button
-                variant="outline"
-                onClick={() => setShowFilters(!showFilters)}
-                className="border-gray-300 hover:border-orange-500 hover:text-orange-600"
-              >
-                <Filter className="w-4 h-4 mr-2" />
-                Filtres
-              </Button>
+
+            {/* Freelancers Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {filteredFreelancers.map((freelancer) => (
+                <FreelancerCard
+                  key={freelancer.id}
+                  freelancer={freelancer}
+                  onClick={() => setSelectedFreelancer(freelancer)}
+                />
+              ))}
             </div>
-          </div>
 
-          {showFilters && (
-            <FilterPanel 
-              filters={filters} 
-              onFiltersChange={setFilters}
-              className="mt-6 pt-6 border-t border-gray-200" 
-            />
-          )}
-        </div>
+            {filteredFreelancers.length === 0 && (
+              <div className="text-center py-12">
+                <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun freelance trouvé</h3>
+                <p className="text-gray-500">Essayez d'ajuster vos critères de recherche</p>
+              </div>
+            )}
+          </TabsContent>
 
-        {/* Freelancers Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredFreelancers.map((freelancer) => (
-            <FreelancerCard
-              key={freelancer.id}
-              freelancer={freelancer}
-              onClick={() => setSelectedFreelancer(freelancer)}
-            />
-          ))}
-        </div>
-
-        {filteredFreelancers.length === 0 && (
-          <div className="text-center py-12">
-            <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun freelance trouvé</h3>
-            <p className="text-gray-500">Essayez d'ajuster vos critères de recherche</p>
-          </div>
-        )}
+          <TabsContent value="dashboard">
+            <Dashboard freelancers={mockFreelancers} />
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Modal */}
