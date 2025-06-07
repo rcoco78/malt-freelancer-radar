@@ -10,8 +10,6 @@ import { FreelancerModal } from '@/components/FreelancerModal';
 import { StatsCards } from '@/components/StatsCards';
 import { FilterPanel } from '@/components/FilterPanel';
 import { Dashboard } from '@/components/Dashboard';
-import { MarketDashboard } from '@/components/MarketDashboard';
-import { calculateMarketMetrics } from '@/services/marketAnalytics';
 
 // Mock data basé sur votre structure
 const mockFreelancers = [
